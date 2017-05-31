@@ -64,6 +64,31 @@ extension UIViewController {
     }
 }
 
+// MARK: - UITableView
+
+extension UITableView {
+    func registerClass<T: UITableViewCell>(_ aClass: T.Type) {
+        register(aClass, forCellReuseIdentifier: String(describing: aClass))
+    }
+    
+    func dequeueReusableCell<T: UITableViewCell>(_ aClass: T.Type, forIndexPath indexPath: IndexPath) -> T {
+        return self.dequeueReusableCell(withIdentifier: String(describing: aClass), for: indexPath) as! T
+    }
+}
+
+// MARK: - UICollectionView
+
+extension UICollectionView {
+    func registerNib<T: UICollectionViewCell>(_ aClass: T.Type) {
+        let reuseIdentifier = String(describing: aClass)
+        let nib = UINib(nibName: String(describing: aClass), bundle: nil)
+        register(nib, forCellWithReuseIdentifier: reuseIdentifier)
+    }
+    func dequeueReusableCell<T: UICollectionViewCell>(_ aClass: T.Type, forIndexPath indexPath: IndexPath) -> T {
+        return self.dequeueReusableCell(withReuseIdentifier: String(describing: aClass), for: indexPath) as! T
+    }
+}
+
 // MARK: - UIStoryboard
 
 extension UIStoryboard {
@@ -199,6 +224,32 @@ extension CGPoint {
 extension CGSize {
     func insetBy(dWidth: CGFloat, dHeight: CGFloat) -> CGSize {
         return CGSize(width: width + dWidth, height: height + dHeight)
+    }
+}
+
+// MARK: - CALayer
+
+extension CALayer {
+    func addBorder(_ edge: UIRectEdge, color: UIColor, thickness: CGFloat) {
+        let border = CALayer()
+        switch edge {
+        case UIRectEdge.top:
+            border.frame = CGRect(x: 0, y: 0, width: frame.width, height: thickness)
+            break
+        case UIRectEdge.bottom:
+            border.frame = CGRect(x: 0, y: frame.height - thickness, width: self.frame.width, height: thickness)
+            break
+        case UIRectEdge.left:
+            border.frame = CGRect(x: 0, y: 0, width: thickness, height: frame.height)
+            break
+        case UIRectEdge.right:
+            border.frame = CGRect(x: frame.width - thickness, y: 0, width: thickness, height: frame.height)
+            break
+        default:
+            break
+        }
+        border.backgroundColor = color.cgColor;
+        addSublayer(border)
     }
 }
 
