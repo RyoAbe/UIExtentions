@@ -8,6 +8,18 @@
 
 import UIKit
 
+// MARK: - NSObject
+
+extension NSObject {
+    class var className: String {
+        return String(describing: self)
+    }
+    
+    var className: String {
+        return type(of: self).className
+    }
+}
+
 // MARK: - UIViewController
 
 extension UIViewController {
@@ -16,7 +28,7 @@ extension UIViewController {
     var mainStoryBoard: UIStoryboard { return UIStoryboard(name: "Main", bundle: nil) }
     
     /// AlertViewController を presentします。
-    func presentAlertViewController(_ title: String?, _ message: String? = nil, okActionHandler: ((UIAlertAction) -> ())? ) {
+    func presentAlertViewController(_ title: String?, _ message: String? = nil, okActionHandler: ((UIAlertAction) -> Void)? ) {
         let alertViewController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let action = UIAlertAction(title: NSLocalizedString("Ok", comment: ""), style: .default, handler: okActionHandler)
         alertViewController.addAction(action)
@@ -31,6 +43,12 @@ extension UIViewController {
     /// AlertViewController を presentします。
     func presentErrorAlertViewController(_ message: String?) {
         presentAlertViewController(NSLocalizedString("Error", comment: ""), message)
+    }
+    
+    // MARK: - for debug
+    
+    func presentNotImplementedAlertViewController() {
+        presentAlertViewController("未実装です")
     }
     
     /// UINavigationController を生成します。
@@ -49,11 +67,7 @@ extension UIViewController {
     }
     
     func dismissViewController(_ sender: AnyObject) {
-        dismissViewController(true, completion: nil)
-    }
-    
-    func dismissViewController(_ flag: Bool = true, completion: (() -> Void)? = nil) {
-        dismiss(animated: flag, completion: completion)
+        dismiss(animated: true, completion: nil)
     }
     
     func loadViewFromXib() -> UIView {
@@ -61,6 +75,16 @@ extension UIViewController {
             abort()
         }
         return view
+    }
+}
+
+// MARK: - UIBarButtonItem
+extension UIBarButtonItem {
+    enum UIBarButtonCustomItem {
+        case cancel
+    }
+    convenience init(customItem: UIBarButtonCustomItem, target: Any?, action: Selector?) {
+        self.init(image: UIImage.xMark(17.6), style: .plain, target: target, action:action )
     }
 }
 
@@ -225,6 +249,16 @@ extension CGSize {
     func insetBy(dWidth: CGFloat, dHeight: CGFloat) -> CGSize {
         return CGSize(width: width + dWidth, height: height + dHeight)
     }
+    
+    var zeroPointFiveInterval: CGSize {
+        return CGSize(width: width.zeroPointFiveInterval, height: height.zeroPointFiveInterval)
+    }
+}
+
+extension CGFloat {
+    var zeroPointFiveInterval: CGFloat {
+        return ceil(self * 2) * 0.5
+    }
 }
 
 // MARK: - CALayer
@@ -248,7 +282,7 @@ extension CALayer {
         default:
             break
         }
-        border.backgroundColor = color.cgColor;
+        border.backgroundColor = color.cgColor
         addSublayer(border)
     }
 }
@@ -278,4 +312,19 @@ protocol Palette {
     static var primaryTextColor: UIColor { get }
     static var secondaryTextColor: UIColor { get }
     static var dviderTextColor: UIColor { get }
+}
+
+struct Platform {
+    static var isSimulator: Bool { return TARGET_OS_SIMULATOR != 0 }
+}
+
+// MARK: - NSNotification
+
+extension NSNotification {
+    var keyboardAnimationDuration: TimeInterval? {
+        return userInfo?[UIKeyboardAnimationDurationUserInfoKey] as? TimeInterval
+    }
+    var keyboardEndFrame: CGRect? {
+        return (userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
+    }
 }
